@@ -6,7 +6,7 @@ This is a repo to adapt different metrics for 3D Object Detection.
 The code is adapted from the evaluation code of nuScenes challenge. 
 For more details, please read the note in `nuscenes/eval/detection/evaluate.py`.
 
-More metrics will be adapted in the future. Below is part of the README.md file of nuScenes repo.
+More metrics will be adapted in the future. Below is part of the README.md file of nuScenes repo. Please mind the sections [Results format](#result-format) and [Evaluation metrics](#evaluation-metrics)
 
 ## Overview
 - [Introduction](#introduction)
