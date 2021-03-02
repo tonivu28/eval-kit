@@ -83,7 +83,7 @@ Note that the [evaluation server](https://eval.ai/web/challenges/challenge-page/
 
 A summary of the results can be seen below. 
 For details, please refer to the [detection leaderboard](https://www.nuscenes.org/object-detection).
-
+ 
 | Rank | Team name    | NDS   | Award           |
 |---   |---           |---    |---              |
 |  1   | MEGVII G3D3  | 63.3% | Best submission |
