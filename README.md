@@ -1,4 +1,4 @@
-# nuScenes detection task
+# 3D Object Detection Evaluation Kit
 ![nuScenes Detection logo](https://www.nuscenes.org/public/images/tasks.png)
 
 ## Note
