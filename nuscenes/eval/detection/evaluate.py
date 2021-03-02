@@ -29,8 +29,8 @@
     You might need to install some packages: pyquaternion, motmetrics if required.
     
     If you wants to read the code, let's me give you a short description of the terminology in nuScenes world which you will find it useful soon:
-        1. scene: basically a clip/video, each scene is associated with an unique id called "scene_token"
-        2. sample: basically a frame which has annotations, each sample is associated with an unique id called "sample_token"
+        1. scene: a clip/video, each scene is associated with an unique id called "scene_token"
+        2. sample: a frame which has annotations, each sample is associated with an unique id called "sample_token"
         3. instance: an object (car, cyclist, pedestrian...) appeared in multiple frames/samples
         4. sample_annotation: a 3D bounding box (with other attributes) of an object in a specific (time)frame/sample
     
