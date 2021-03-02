@@ -25,6 +25,10 @@
     (***) means future work, the code for these features are not yet implemented.
 
     All the code might seem complicated but it will become handy as the evaluation metrics getting more complex.
+    To adapt with your data, you should change serveral files such as:
+        nuscenes/eval/detection/configs/detection_cvpr_2019.json
+        nuscenes/eval/detection/constants.py
+    
     If you just want to get the results, don't bother with the details, just give input to the function "nusc_eval_kit()" at the end of this page.
     You might need to install some packages: pyquaternion, motmetrics if required.
     
@@ -35,7 +39,7 @@
         4. sample_annotation: a 3D bounding box (with other attributes) of an object in a specific (time)frame/sample
     
     It's assumed that:
-    - Every "sample_token" is given in the results, although there may be not predictions for that sample.
+    - Every "sample_token" in the GT is given in the results, although there may be not predictions for that sample.
     
     I created dummy groundtruth and prediction files for illustration of the format of these files:
         data/sets/demo/gt.json
@@ -99,9 +103,9 @@ class DetectionEval:
         # Load data.
         if verbose:
             print('Initializing nuScenes detection evaluation')
+        # loading pred_boxes and 
         self.pred_boxes, self.meta = load_prediction(self.result_path, self.cfg.max_boxes_per_sample, DetectionBox,
-                                                     verbose=verbose)  # pred_boxes is a Dict(key = sample_token, value = list[Detection Box])                                 
-        # self.gt_boxes = load_gt(self.nusc, self.eval_set, DetectionBox, verbose=verbose)
+                                                     verbose=verbose)# pred_boxes is a Dict(key = sample_token, value = list[Detection Box])                                 
         self.gt_boxes = load_groundtruth(self.groundtruth_path, DetectionBox,
                                                      verbose=verbose)
         
