@@ -8,7 +8,7 @@ import numpy as np
 
 from nuscenes.eval.common.data_classes import MetricData, EvalBox
 from nuscenes.eval.common.utils import center_distance
-from nuscenes.eval.detection.constants import DETECTION_NAMES, ATTRIBUTE_NAMES, TP_METRICS
+from nuscenes.eval.detection.constants import DETECTION_NAMES, TP_METRICS#, ATTRIBUTE_NAMES, 
 
 
 class DetectionConfig:
@@ -332,8 +332,8 @@ class DetectionBox(EvalBox):
         assert detection_name is not None, 'Error: detection_name cannot be empty!'
         assert detection_name in DETECTION_NAMES, 'Error: Unknown detection_name %s' % detection_name
 
-        assert attribute_name in ATTRIBUTE_NAMES or attribute_name == '', \
-            'Error: Unknown attribute_name %s' % attribute_name
+        # assert attribute_name in ATTRIBUTE_NAMES or attribute_name == '', \
+        #     'Error: Unknown attribute_name %s' % attribute_name
 
         assert type(detection_score) == float, 'Error: detection_score must be a float!'
         assert not np.any(np.isnan(detection_score)), 'Error: detection_score may not be NaN!'
