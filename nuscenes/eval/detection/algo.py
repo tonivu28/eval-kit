@@ -1,8 +1,7 @@
 # nuScenes dev-kit.
 # Code written by Oscar Beijbom, 2019.
 
-from typing import Callable, List
-
+from typing import Callable, Tuple, Dict
 import numpy as np
 
 from nuscenes.eval.common.data_classes import EvalBoxes
@@ -15,7 +14,11 @@ def accumulate(gt_boxes: EvalBoxes,
                class_name: str,
                dist_fcn: Callable, #"center_distance"
                dist_th: float,
-               verbose: bool = False) -> DetectionMetricData:
+               verbose: bool = False,
+               is_average_delay = False, # boolean to choose if calculate delay_metric
+                ) -> Tuple[DetectionMetricData, Dict]:
+    # DetectionMetricData is for nuScences metrics
+    # Dict is for Average Delay metric
     """
     Average Precision over predefined different recall thresholds for a single distance threshold.
     The recall/conf thresholds and other raw metrics will be used in secondary metrics.
@@ -30,6 +33,7 @@ def accumulate(gt_boxes: EvalBoxes,
     # ---------------------------------------------
     # Organize input and initialize accumulators.
     # ---------------------------------------------
+    instance_dict = {}
 
     # Count the positives.
     npos = len([1 for gt_box in gt_boxes.all if gt_box.detection_name == class_name])
@@ -39,7 +43,7 @@ def accumulate(gt_boxes: EvalBoxes,
 
     # For missing classes in the GT, return a data structure corresponding to no predictions.
     if npos == 0:
-        return DetectionMetricData.no_predictions()
+        return DetectionMetricData.no_predictions(), instance_dict
 
     # Organize the predictions in a single list.
     pred_boxes_list = [box for box in pred_boxes.all if box.detection_name == class_name] # all PRED boxes for a certain class
@@ -114,10 +118,10 @@ def accumulate(gt_boxes: EvalBoxes,
             tp.append(0)
             fp.append(1)
             conf.append(pred_box.detection_score)
-            
+    
     # Check if we have any matches. If not, just return a "no predictions" array.
     if len(match_data['trans_err']) == 0:
-        return DetectionMetricData.no_predictions()
+        return DetectionMetricData.no_predictions(), instance_dict
 
     # ---------------------------------------------
     # Calculate and interpolate precision and recall
@@ -131,11 +135,7 @@ def accumulate(gt_boxes: EvalBoxes,
     # Calculate precision and recall.
     prec = tp / (fp + tp)
     rec = tp / float(npos)
-    # # For AD metric
-    # fp_ratio_ = fp/float(npos) # len = number of all boxes in the class (matches)
-    # fp_interp = np.array(fp_ratios)
-    # conf_fp = np.interp(fp_interp, fp_ratio_, conf, left = 1) 
-    # ###
+
     rec_interp = np.linspace(0, 1, DetectionMetricData.nelem)  # 101 steps, from 0% to 100% recall.
     prec = np.interp(rec_interp, rec, prec, right=0)
     conf = np.interp(rec_interp, rec, conf, right=0)
@@ -155,11 +155,27 @@ def accumulate(gt_boxes: EvalBoxes,
 
             # Then interpolate based on the confidences. (Note reversing since np.interp needs increasing arrays)
             match_data[key] = np.interp(conf[::-1], match_data['conf'][::-1], tmp[::-1])[::-1]    # len = 101
-
+    
+    # ---------------------------------------------
+    # The calculation of Average Delay metric starts from here
+    # ---------------------------------------------
+    # instance_dict = {}
+    if is_average_delay:
+        ###
+        # Do accumulation for average delay metric
+        ###
+        # toy example
+        instance_dict = {'car_number_0':[{'num_frame_after_appear': 0, 'conf_score': 0.3},
+                                         {'num_frame_after_appear': 2, 'conf_score': 0.8},
+                                         {'num_frame_after_appear': 3, 'conf_score': 0.6}],
+                         'car_number_1':[],
+                         'car_number_2':[{'num_frame_after_appear': 3, 'conf_score': 0.4},
+                                         {'num_frame_after_appear': 6, 'conf_Score': 0.9}]} 
+        
     # ---------------------------------------------
     # Done. Instantiate MetricData and return
     # ---------------------------------------------
-    return DetectionMetricData(recall=rec,
+    md = DetectionMetricData(recall=rec,
                                precision=prec,
                                confidence=conf,
                                trans_err=match_data['trans_err'],
@@ -167,7 +183,8 @@ def accumulate(gt_boxes: EvalBoxes,
                                scale_err=match_data['scale_err'],
                                orient_err=match_data['orient_err'],
                                attr_err=match_data['attr_err'])
-                               # conf_fp = conf_fp)
+    
+    return md, instance_dict
 
 
 def calc_ap(md: DetectionMetricData, min_recall: float, min_precision: float) -> float:

@@ -23,8 +23,8 @@ class DetectionConfig:
                  min_precision: float = 0.1,
                  max_boxes_per_sample: int = 500,
                  mean_ap_weight: int = 5,
-                 fp_ratios: List[float] = [0.1, 0.2, 0.4, 0.8, 1.6, 3.2], # for AD metric
-                 delay_window: int = 30,    # for AD metric
+                 fp_ratios: List[float] = [0.1, 0.2, 0.4, 0.8, 1.6, 3.2], # for Average Delay metric
+                 delay_window: int = 30,    # for Average Delay metric
                  ):
 
         assert set(class_range.keys()) == set(DETECTION_NAMES), "Class count mismatch."

@@ -50,7 +50,7 @@
 # import argparse
 import json
 import os
-os.chdir('C:/Users/nghiavt5/Documents/VinAI/eval-kit')
+# os.chdir('C:/Users/nghiavt5/Documents/VinAI/eval-kit')
 # import random
 import time
 from typing import Tuple, Dict, Any
@@ -73,7 +73,9 @@ class DetectionEval:
                  result_path: str,
                  groundtruth_path: str,
                  output_dir: str = None,
-                 verbose: bool = True):
+                 verbose: bool = True,
+                 is_average_delay = False # Whether to calculate average delay metric. Keep it False for now.
+                 ):
         """
         Initialize a DetectionEval object.
         :param config: A DetectionConfig object.
@@ -88,6 +90,8 @@ class DetectionEval:
         self.output_dir = output_dir
         self.verbose = verbose
         self.cfg = config
+        
+        self.is_average_delay = is_average_delay
 
         # Check result file exists.
         assert os.path.exists(result_path), 'Error: The result file does not exist!'
@@ -130,7 +134,7 @@ class DetectionEval:
         metric_data_list = DetectionMetricDataList()
         for class_name in self.cfg.class_names:
             for dist_th in self.cfg.dist_ths:
-                md = accumulate(self.gt_boxes, self.pred_boxes, class_name, self.cfg.dist_fcn_callable, dist_th)
+                md, instance_dict = accumulate(self.gt_boxes, self.pred_boxes, class_name, self.cfg.dist_fcn_callable, dist_th, False, self.is_average_delay)
                 metric_data_list.set(class_name, dist_th, md)
 
         # -----------------------------------
@@ -250,10 +254,11 @@ class DetectionEval:
 def nusc_eval_kit(
         result_path: str = 'data/demo/vmetrics/submission2.json',    # The submission as a JSON file.
         groundtruth_path: str = 'data/demo/vmetrics/gt2.json',       # The ground truth as a JSON file.
-        output_dir: str = 'data/eval_out/vmetrics/',                    # Folder to store result metrics
+        output_dir: str = 'data/eval_out/vmetrics/',                 # Folder to store result metrics.
         config_path: str = '',  #'Path to the configuration file. If no path given, the CVPR 2019 configuration will be used.
-        render_curves: bool = True,                            # Whether to render PR and TP curves to disk
-        verbose: bool = True):                                  # 'Whether to print to stdout.'
+        render_curves: bool = True,                             # Whether to render PR and TP curves to disk.
+        verbose: bool = True,                                   # Whether to print to stdout.
+        is_average_delay = False):                              # Whether to calculate average delay metric. Keep it False for now.    
     
     if config_path == '':
         cfg = config_factory('detection_cvpr_2019')
@@ -261,7 +266,13 @@ def nusc_eval_kit(
         with open(config_path, 'r') as _f:
             cfg = DetectionConfig.deserialize(json.load(_f))
 
-    nusc_eval = DetectionEval(config=cfg, result_path=result_path, groundtruth_path = groundtruth_path, output_dir=output_dir, verbose=verbose)
+    nusc_eval = DetectionEval(config = cfg, 
+                              result_path = result_path, 
+                              groundtruth_path = groundtruth_path, 
+                              output_dir = output_dir, 
+                              verbose = verbose,
+                              is_average_delay = is_average_delay)
+    
     nusc_eval.main(render_curves=render_curves)
   
     
