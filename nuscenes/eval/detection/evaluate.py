@@ -35,22 +35,22 @@
     If you wants to read the code, let's me give you a short description of the terminology in nuScenes world which you will find it useful soon:
         1. scene: a clip/video, each scene is associated with an unique id called "scene_token"
         2. sample: a frame which has annotations, each sample is associated with an unique id called "sample_token"
-        3. instance: an object (car, cyclist, pedestrian...) appeared in multiple frames/samples
+        3. instance: an object (car, cyclist, pedestrian...) appeared in multiple consecutive frames/samples
         4. sample_annotation: a 3D bounding box (with other attributes) of an object in a specific (time)frame/sample
     
     It's assumed that:
     - Every "sample_token" in the GT is given in the results, although there may be not predictions for that sample.
     
-    I created dummy groundtruth and prediction files for illustration of the format of these files:
-        data/sets/demo/gt.json
-        data/sets/demo/submission.json
+    I created dummy groundtruth and prediction files for illustration of their format:
+        data/demo/.../gt*.json
+        data/demo/.../submission*.json
     
 """
 
 # import argparse
 import json
 import os
-# os.chdir('C:/Users/nghiavt5/Documents/VinAI/eval-kit')
+os.chdir('C:/Users/nghiavt5/Documents/VinAI/eval-kit')
 # import random
 import time
 from typing import Tuple, Dict, Any
@@ -248,11 +248,11 @@ class DetectionEval:
 
 
 def nusc_eval_kit(
-        result_path: str = 'data/sets/demo/submission.json',    # The submission as a JSON file.
-        groundtruth_path: str = 'data/sets/demo/gt.json',       # The ground truth as a JSON file.
-        output_dir: str = 'data/sets/demo/',                    # Folder to store result metrics
+        result_path: str = 'data/demo/vmetrics/submission2.json',    # The submission as a JSON file.
+        groundtruth_path: str = 'data/demo/vmetrics/gt2.json',       # The ground truth as a JSON file.
+        output_dir: str = 'data/eval_out/vmetrics/',                    # Folder to store result metrics
         config_path: str = '',  #'Path to the configuration file. If no path given, the CVPR 2019 configuration will be used.
-        render_curves: bool = False,                            # Whether to render PR and TP curves to disk
+        render_curves: bool = True,                            # Whether to render PR and TP curves to disk
         verbose: bool = True):                                  # 'Whether to print to stdout.'
     
     if config_path == '':

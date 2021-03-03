@@ -1,7 +1,7 @@
 # nuScenes dev-kit.
 # Code written by Oscar Beijbom, 2019.
 
-from typing import Callable
+from typing import Callable, List
 
 import numpy as np
 
@@ -50,7 +50,7 @@ def accumulate(gt_boxes: EvalBoxes,
               format(len(pred_confs), class_name, len(pred_boxes.all), len(pred_boxes.sample_tokens)))
 
     # Sort by confidence.
-    sortind = [i for (v, i) in sorted((v, i) for (i, v) in enumerate(pred_confs))][::-1]
+    sortind = [i for (v, i) in sorted((v, i) for (i, v) in enumerate(pred_confs))][::-1] # decreasing conf
 
     # Do the actual matching.
     tp = []  # Accumulator of true positives.
@@ -114,7 +114,7 @@ def accumulate(gt_boxes: EvalBoxes,
             tp.append(0)
             fp.append(1)
             conf.append(pred_box.detection_score)
-
+            
     # Check if we have any matches. If not, just return a "no predictions" array.
     if len(match_data['trans_err']) == 0:
         return DetectionMetricData.no_predictions()
@@ -131,7 +131,11 @@ def accumulate(gt_boxes: EvalBoxes,
     # Calculate precision and recall.
     prec = tp / (fp + tp)
     rec = tp / float(npos)
-
+    # # For AD metric
+    # fp_ratio_ = fp/float(npos) # len = number of all boxes in the class (matches)
+    # fp_interp = np.array(fp_ratios)
+    # conf_fp = np.interp(fp_interp, fp_ratio_, conf, left = 1) 
+    # ###
     rec_interp = np.linspace(0, 1, DetectionMetricData.nelem)  # 101 steps, from 0% to 100% recall.
     prec = np.interp(rec_interp, rec, prec, right=0)
     conf = np.interp(rec_interp, rec, conf, right=0)
@@ -143,7 +147,7 @@ def accumulate(gt_boxes: EvalBoxes,
 
     for key in match_data.keys():
         if key == "conf":
-            continue  # Confidence is used as reference to align with fp and tp. So skip in this step. len(conf) = num of matches
+            continue  # Confidence is used as reference to align with fp and tp. So skip in this step. len(conf) = num of pred_boxes
 
         else:
             # For each match_data, we first calculate the accumulated mean.
@@ -163,6 +167,7 @@ def accumulate(gt_boxes: EvalBoxes,
                                scale_err=match_data['scale_err'],
                                orient_err=match_data['orient_err'],
                                attr_err=match_data['attr_err'])
+                               # conf_fp = conf_fp)
 
 
 def calc_ap(md: DetectionMetricData, min_recall: float, min_precision: float) -> float:

@@ -16,17 +16,20 @@ class DetectionConfig:
 
     def __init__(self,
                  class_range: Dict[str, int],
-                 dist_fcn: str,
-                 dist_ths: List[float],
-                 dist_th_tp: float,
-                 min_recall: float,
-                 min_precision: float,
-                 max_boxes_per_sample: int,
-                 mean_ap_weight: int):
+                 dist_fcn: str = "center_distance",
+                 dist_ths: List[float] = [0.5, 1.0, 2.0, 4.0],
+                 dist_th_tp: float = 2.0,
+                 min_recall: float = 0.1,
+                 min_precision: float = 0.1,
+                 max_boxes_per_sample: int = 500,
+                 mean_ap_weight: int = 5,
+                 fp_ratios: List[float] = [0.1, 0.2, 0.4, 0.8, 1.6, 3.2], # for AD metric
+                 delay_window: int = 30,    # for AD metric
+                 ):
 
         assert set(class_range.keys()) == set(DETECTION_NAMES), "Class count mismatch."
         assert dist_th_tp in dist_ths, "dist_th_tp must be in set of dist_ths."
-
+        # for nuscenes metrics
         self.class_range = class_range
         self.dist_fcn = dist_fcn
         self.dist_ths = dist_ths
@@ -35,6 +38,9 @@ class DetectionConfig:
         self.min_precision = min_precision
         self.max_boxes_per_sample = max_boxes_per_sample
         self.mean_ap_weight = mean_ap_weight
+        # for AD metric
+        self.fp_ratios = fp_ratios
+        self.delay_window = delay_window
 
         self.class_names = self.class_range.keys()
 
@@ -92,7 +98,7 @@ class DetectionMetricData(MetricData):
                  scale_err: np.array,
                  orient_err: np.array,
                  attr_err: np.array):
-
+                 
         # Assert lengths.
         assert len(recall) == self.nelem
         assert len(precision) == self.nelem
